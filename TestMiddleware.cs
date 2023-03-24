@@ -9,32 +9,25 @@ using System.Threading.Tasks;
 
 namespace CoreWcfTest
 {
-    public class MyMemoryStream : MemoryStream, IDisposable
+    public class MyMemoryStream : MemoryStream
     {
         public override void Close()
         {
             base.Close();
         }
-
-        void IDisposable.Dispose()
-        {
-        }
     }
 
-    public class RequestResponseLoggingMiddleware
+    public class ResponseLoggingMiddleware
     {
-        public const string StopwatchHttpContextItemName = "LoggingStopwatch";
-
         private readonly RequestDelegate next;
 
-        public RequestResponseLoggingMiddleware(RequestDelegate next)
+        public ResponseLoggingMiddleware(RequestDelegate next)
         {
             this.next = next;
         }
 
         public async Task Invoke(HttpContext context)
         {
-            // Only log JSON messages, SOAP logging needs to consider WS-Security
             Console.WriteLine("Processing request");
 
             var originalBodyStream = context.Response.Body;
@@ -47,7 +40,10 @@ namespace CoreWcfTest
             
             Console.WriteLine("Processing response: " + Encoding.UTF8.GetString(responseBody.ToArray()));
 
+            responseBody.Seek(0, SeekOrigin.Begin);
             await responseBody.CopyToAsync(originalBodyStream);
+
+            context.Response.Body = originalBodyStream;
         }
     }
 }

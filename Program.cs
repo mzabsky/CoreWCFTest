@@ -100,7 +100,7 @@ internal class Program
         myWSHttpBinding.Security.Transport.ClientCredentialType = CoreWCF.HttpClientCredentialType.None;
 
 
-        app.UseMiddleware<RequestResponseLoggingMiddleware>();
+        app.UseMiddleware<ResponseLoggingMiddleware>();
         app.UseServiceModel(builder =>
         {
             builder.AddService<EchoService>((serviceOptions) => { })
